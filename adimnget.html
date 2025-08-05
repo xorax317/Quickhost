@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Claim Orders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      animation: fadeIn 1.5s ease;
+    }
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.5px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      margin: 25px 0;
+      width: 90%;
+      max-width: 800px;
+      animation: slideIn 1s ease forwards;
+      opacity: 0;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .order-list {
+      max-height: 500px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .order-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .order-item p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .order-item .status-pending {
+      color: #ffcc00;
+    }
+
+    .order-item .status-approved {
+      color: #00ffcc;
+    }
+
+    .order-item .status-rejected {
+      color: #ff5555;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #00c6ff, #0072ff);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 198, 255, 0.6);
+      background: linear-gradient(90deg, #00e6ff, #008cff);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 8px rgba(0, 198, 255, 0.4);
+    }
+
+    .reject-btn {
+      background: linear-gradient(90deg, #ff5555, #ff2a2a);
+    }
+
+    .reject-btn:hover {
+      background: linear-gradient(90deg, #ff7777, #ff4d4d);
+    }
+
+    .clear-btn {
+      background: linear-gradient(90deg, #ffaa00, #ff7700);
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .clear-btn:hover {
+      background: linear-gradient(90deg, #ffcc33, #ff9933);
+    }
+
+    #backBtn {
+      background: linear-gradient(90deg, #ff5555, #ff2a2a);
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    #backBtn:hover {
+      background: linear-gradient(90deg, #ff7777, #ff4d4d);
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+      z-index: 1000;
+      animation: popIn 0.3s ease;
+      display: none;
+    }
+
+    .modal.correct {
+      border: 2px solid #00ffcc;
+    }
+
+    .modal.wrong {
+      border: 2px solid #ff5555;
+    }
+
+    @keyframes popIn {
+      from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 20px;
+        max-width: 100%;
+      }
+
+      .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .order-item p {
+        font-size: 12px;
+      }
+
+      button {
+        padding: 8px 16px;
+        font-size: 12px;
+        margin: 5px 0;
+      }
+
+      .modal {
+        width: 80%;
+        font-size: 16px;
+        padding: 15px;
+      }
+    }
+
+    button:focus {
+      outline: 2px solid #00c6ff;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div id="modal" class="modal"></div>
+  <h2>Admin Claim Orders</h2>
+  <div class="card">
+    <p><strong>Admin:</strong> <span id="adminEmail"></span></p>
+    <div class="order-list" id="orderList">
+      <p>No claim orders found.</p>
+    </div>
+    <button id="clearBtn" class="clear-btn">Clear Approved/Rejected Orders</button>
+    <button id="backBtn">Back to Dashboard</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSTtq5pB7AAWlFAl-5D0Te1_dN5vP_kVI",
+      authDomain: "adimn-user.firebaseapp.com",
+      projectId: "adimn-user",
+      storageBucket: "adimn-user.firebasestorage.app",
+      messagingSenderId: "1003269507396",
+      appId: "1:1003269507396:web:c5004b818985b1c2faef11",
+      measurementId: "G-K1Y2VEP13H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const adminEmailEl = document.getElementById("adminEmail");
+    const orderListEl = document.getElementById("orderList");
+    const clearBtn = document.getElementById("clearBtn");
+    const backBtn = document.getElementById("backBtn");
+    const modalEl = document.getElementById("modal");
+
+    const ALLOWED_EMAIL = "dslash063@gmail.com";
+
+    function showModal(message, type) {
+      modalEl.textContent = message;
+      modalEl.className = `modal ${type}`;
+      modalEl.style.display = 'block';
+      setTimeout(() => {
+        modalEl.style.display = 'none';
+      }, 2000);
+    }
+
+    async function loadClaims() {
+      try {
+        const claimsSnapshot = await getDocs(collection(db, "claims"));
+        const claims = claimsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (claims.length === 0) {
+          orderListEl.innerHTML = "<p>No claim orders found.</p>";
+          return;
+        }
+
+        orderListEl.innerHTML = claims.map(claim => `
+          <div class="order-item">
+            <p>
+              Email: ${claim.email}<br>
+              Telegram Username: ${claim.telegramUsername || 'Not provided'}<br>
+              Stars: ${claim.amount}<br>
+              Status: <span class="status-${claim.status}">${claim.status}</span><br>
+              Date: ${new Date(claim.timestamp).toLocaleString()}
+            </p>
+            <div>
+              ${claim.status === "pending" ? `
+                <button class="approve-btn" data-id="${claim.id}">Approve</button>
+                <button class="reject-btn" data-id="${claim.id}">Reject</button>
+              ` : ""}
+            </div>
+          </div>
+        `).join("");
+
+        document.querySelectorAll(".approve-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const claimId = btn.getAttribute("data-id");
+            try {
+              await updateDoc(doc(db, "claims", claimId), {
+                status: "approved"
+              });
+              showModal("Claim approved successfully!", 'correct');
+              loadClaims();
+            } catch (error) {
+              showModal("Failed to approve claim.", 'wrong');
+              console.error("Error approving claim:", error);
+            }
+          };
+        });
+
+        document.querySelectorAll(".reject-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const claimId = btn.getAttribute("data-id");
+            try {
+              const claimRef = doc(db, "claims", claimId);
+              const claimSnap = await getDoc(claimRef);
+              const claimData = claimSnap.data();
+              const userRef = doc(db, "users", claimData.userId);
+              const userSnap = await getDoc(userRef);
+              const userStars = userSnap.data().stars || 0;
+
+              await updateDoc(userRef, { stars: userStars + claimData.amount });
+              await updateDoc(claimRef, { status: "rejected" });
+              showModal("Claim rejected and stars refunded.", 'correct');
+              loadClaims();
+            } catch (error) {
+              showModal("Failed to reject claim.", 'wrong');
+              console.error("Error rejecting claim:", error);
+            }
+          };
+        });
+      } catch (error) {
+        showModal("Failed to load claims.", 'wrong');
+        console.error("Error loading claims:", error);
+      }
+    }
+
+    async function clearCompletedOrders() {
+      try {
+        const completedClaimsQuery = await getDocs(query(collection(db, "claims"), where("status", "in", ["approved", "rejected"])));
+        const deletePromises = completedClaimsQuery.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+        showModal(`Cleared ${deletePromises.length} completed orders.`, 'correct');
+        loadClaims();
+      } catch (error) {
+        showModal("Failed to clear completed orders.", 'wrong');
+        console.error("Error clearing completed orders:", error);
+      }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        if (user.email === ALLOWED_EMAIL) {
+          adminEmailEl.textContent = user.email;
+          loadClaims();
+        } else {
+          showModal("Access denied. Only dslash063@gmail.com can access this page.", 'wrong');
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 2000);
+        }
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    clearBtn.onclick = async () => {
+      await clearCompletedOrders();
+    };
+
+    backBtn.onclick = () => {
+      window.location.href = "dashboard.html";
+    };
+  </script>
+</body>
+</html>
+
